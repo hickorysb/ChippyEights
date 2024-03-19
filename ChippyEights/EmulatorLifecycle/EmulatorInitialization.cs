@@ -85,6 +85,15 @@ public static class EmulatorInitialization
                 case Keyboard.Key.V:
                     ChippyEights.MyCpu.Keys[0xF] = KeyState.Pressed;
                     break;
+                case Keyboard.Key.T:
+                    if (keyEventArgs.Alt)
+                    {
+                        ChippyEights.MyCpu.Dispose();
+                        ChippyEights.MyCpu = new Chip8Cpu();
+                        ChippyEights.LoadRomData();
+                        GC.Collect();
+                    }
+                    break;
             }
         };
         DisplayManager.Window.KeyReleased += (sender, keyEventArgs) =>

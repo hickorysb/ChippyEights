@@ -4,7 +4,7 @@ using static ChippyEights.Utilities.DateTimeUtilities;
 
 namespace ChippyEights.Emulation;
 
-public class Chip8Cpu
+public class Chip8Cpu : IDisposable
 {
     internal ushort Index;
     internal readonly byte[] Registers = new byte[16];
@@ -21,7 +21,6 @@ public class Chip8Cpu
     private byte soundTimer;
     private readonly ushort[] stack = new ushort[16];
     private ushort stackPointer;
-    private int cycleCount;
     private float timeTilDecrement = 0.0166666666f;
     private readonly short[] rawAudioSamples = new short[samples];
     private byte? keyPressed;
@@ -71,6 +70,11 @@ public class Chip8Cpu
         SoundBuffer buffer = new SoundBuffer(rawAudioSamples, 1, 44100);
         BeeperSound = new Sound(buffer);
         BeeperSound.Loop = true;
+        
+        for (var i = 0; i < Keys.Length; i++)
+        {
+            Keys[i] = KeyState.Released;
+        }
     }
 
     private void IncrementProgramCounter()
@@ -90,8 +94,6 @@ public class Chip8Cpu
             if (soundTimer >= 1) soundTimer--;
         }
         CurrentOpCode = (ushort)(memory[ProgramCounter] << 8 | memory[ProgramCounter + 1]);
-
-        Console.WriteLine("Cycle: " + ++cycleCount);
         
         byte firstFourBits = (byte)(CurrentOpCode >> 12);
 
@@ -324,7 +326,7 @@ public class Chip8Cpu
                 byte lastByte = (byte)(CurrentOpCode & 0x00FF);
                 switch ((SkpkNibbles)lastByte)
                 {
-                    case SkpkNibbles.Sip:
+                    case SkpkNibbles.Skp:
                     {
                         if (Keys[Registers[x]] == KeyState.Pressed)
                         {
@@ -333,7 +335,7 @@ public class Chip8Cpu
 
                         break;
                     }
-                    case SkpkNibbles.Sinp:
+                    case SkpkNibbles.Sknp:
                     {
                         if (Keys[Registers[x]] == KeyState.Released)
                         {
@@ -360,12 +362,12 @@ public class Chip8Cpu
                         bool keyPress = false;
                         for (int i = 0; i < Keys.Length; i++)
                         {
-                            if (Keys[i] == 0) continue;
+                            if (Keys[i] == KeyState.Released) continue;
                             keyPressed = (byte)i;
                             break;
                         }
 
-                        if (keyPressed != null && Keys[keyPressed.Value] == 0)
+                        if (keyPressed != null && Keys[keyPressed.Value] == KeyState.Released)
                         {
                             Registers[x] = keyPressed.Value;
                             keyPress = true;
@@ -431,5 +433,11 @@ public class Chip8Cpu
         {
             memory[i + 0x200] = romData[i];
         }
+    }
+
+    public void Dispose()
+    {
+        BeeperSound.SoundBuffer.Dispose();
+        BeeperSound.Dispose();
     }
 }
