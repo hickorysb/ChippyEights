@@ -94,6 +94,16 @@ public static class EmulatorInitialization
                         GC.Collect();
                     }
                     break;
+                case Keyboard.Key.PageUp:
+                    DisplayManager.CyclesPerSecondLimit += 50;
+                    DisplayManager.Window.SetFramerateLimit(DisplayManager.CyclesPerSecondLimit);
+                    Console.WriteLine("New max cycle-rate: " + DisplayManager.CyclesPerSecondLimit);
+                    break;
+                case Keyboard.Key.PageDown:
+                    DisplayManager.CyclesPerSecondLimit -= 50;
+                    DisplayManager.Window.SetFramerateLimit(DisplayManager.CyclesPerSecondLimit);
+                    Console.WriteLine("New max cycle-rate: " + DisplayManager.CyclesPerSecondLimit);
+                    break;
             }
         };
         DisplayManager.Window.KeyReleased += (sender, keyEventArgs) =>

@@ -7,11 +7,13 @@ namespace ChippyEights.Graphics;
 public static class DisplayManager
 {
     public static RenderWindow Window;
-
+    internal static uint CyclesPerSecondLimit = 2000;
+    
+    
     public static void InitializeWindow()
     {
         Window = new RenderWindow(VideoMode.DesktopMode, "ChippyEights", Styles.Close | Styles.Titlebar | Styles.Resize, new ContextSettings() { AntialiasingLevel = 0 });
-        Window.SetFramerateLimit(2000);
+        Window.SetFramerateLimit(CyclesPerSecondLimit);
         Window.GetView().Size = new Vector2f(Window.Size.X, Window.Size.Y);
         Window.Resized += (sender, args) =>
         {
